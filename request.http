@@ -1,4 +1,4 @@
-## '/' GET
-GET http://localhost:5000 HTTP/1.1
+### GET /api/v1/tours get all tours
+GET http://localhost:5000/api/v1/tours HTTP/1.1
 
 ###
