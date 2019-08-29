@@ -1,4 +1,14 @@
-### GET /api/v1/tours get all tours
+###Get all tours - GET /api/v1/tours
 GET http://localhost:5000/api/v1/tours HTTP/1.1
+
+###Create new tour - POST /api/v1/tours
+POST http://localhost:5000/api/v1/tours HTTP/1.1
+Content-Type: application/json
+
+{
+	"difficulty": "easy",
+	"name": "test tour",
+	"duration": 10
+}
 
 ###
