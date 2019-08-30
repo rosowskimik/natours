@@ -1,59 +1,31 @@
-const fs = require('fs');
 const express = require('express');
+const morgan = require('morgan');
+
+const tourRouter = require('./routes/tourRoutes');
+const userRouter = require('./routes/userRoutes');
 
 const app = express();
 
+// 1) MIDDLEWARES
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
+
 app.use(express.json());
+app.use(express.static(`${__dirname}/public`));
 
-const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
-);
-
-app.get('/api/v1/tours', (req, res) => {
-  res.status(200).json({
-    status: 'success',
-    results: tours.length,
-    data: {
-      tours
-    }
-  });
+app.use((req, res, next) => {
+  console.log('Hello from the middleware 👋');
+  next();
 });
 
-app.get('/api/v1/tours/:id', (req, res) => {
-  const { id } = req.params;
-
-  const tour = tours.find(el => el.id === id * 1);
-  if (!tour)
-    return res.status(404).json({ status: 'fail', message: 'Invalid ID' });
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      tour
-    }
-  });
+app.use((req, res, next) => {
+  req.requestTime = new Date().toISOString();
+  next();
 });
 
-app.post('/api/v1/tours', (req, res) => {
-  const newId = tours[tours.length - 1].id + 1;
-  const newTour = Object.assign({ id: newId }, req.body);
+// 3) ROUTES
+app.use('/api/v1/tours', tourRouter);
+app.use('/api/v1/users', userRouter);
 
-  tours.push(newTour);
-
-  fs.writeFile(
-    `${__dirname}/dev-data/data/tours-simple.json`,
-    JSON.stringify(tours),
-    err => {
-      if (!err) {
-        res.status(201).json({ status: 'success', data: { tour: newTour } });
-      } else {
-        res.status(500).json({ status: 'error' });
-      }
-    }
-  );
-});
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
-});
+module.exports = app;

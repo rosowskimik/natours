@@ -11,7 +11,8 @@ Content-Type: application/json
 {
 	"difficulty": "easy",
 	"name": "test tour",
-	"duration": 10
+	"duration": 10,
+	"price": 123
 }
 
 ###
