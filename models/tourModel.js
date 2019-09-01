@@ -19,13 +19,25 @@ const tourSchema = new mongoose.Schema(
     },
     difficulty: {
       type: String,
-      required: [true, 'A tour must have a difficulty']
+      required: [true, 'A tour must have a difficulty'],
+      enum: {
+        values: ['easy', 'medium', 'difficult'],
+        message: 'The difficulty must be either easy, medium, or difficult.'
+      }
     },
     price: {
       type: Number,
       required: [true, 'A tour must have a price']
     },
-    priceDiscount: Number,
+    priceDiscount: {
+      type: Number,
+      validate: {
+        validator: function(val) {
+          return this.price > val;
+        },
+        message: 'The discount price should be smaller than the normal price.'
+      }
+    },
     summary: {
       type: String,
       trim: true,
@@ -33,7 +45,9 @@ const tourSchema = new mongoose.Schema(
     },
     ratingsAverage: {
       type: Number,
-      default: 4.5
+      default: 4.5,
+      min: [1, 'Ratings average should be greater than or equal to 1.0'],
+      max: [5, 'Ratings average should be smaller than or equal to 5.0']
     },
     ratingsQuantity: {
       type: Number,
@@ -54,7 +68,11 @@ const tourSchema = new mongoose.Schema(
       select: false
     },
     startDates: [Date],
-    slug: String
+    slug: String,
+    secret: {
+      type: Boolean,
+      default: false
+    }
   },
   {
     toJSON: { virtuals: true },
@@ -62,12 +80,24 @@ const tourSchema = new mongoose.Schema(
   }
 );
 
+// Virtual props
 tourSchema.virtual('durationWeeks').get(function() {
   return (this.duration / 7).toFixed();
 });
 
+// Middlewares
 tourSchema.pre('save', function(next) {
   this.slug = slugify(this.name, { lower: true });
+  next();
+});
+
+tourSchema.pre(/^find/, function(next) {
+  this.find({ secret: { $ne: true } });
+  next();
+});
+
+tourSchema.pre('aggregate', function(next) {
+  this.pipeline().unshift({ $match: { secret: { $ne: true } } });
   next();
 });
 
