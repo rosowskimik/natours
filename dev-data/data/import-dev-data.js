@@ -26,6 +26,7 @@ const tours = JSON.parse(
 
 const importData = async () => {
   try {
+    tours.forEach(el => delete el.id);
     await Tour.create(tours);
     console.log('Data created successfully');
   } catch (error) {
