@@ -13,6 +13,15 @@ const handleDuplicateKey = err => {
   return new AppError(message, 400);
 };
 
+const handleValidationError = err => {
+  const errors = Object.values(err.errors)
+    .map(el => el.message)
+    .join('. ');
+
+  const message = `Invalid input data. ${errors}`;
+  return new AppError(message, 400);
+};
+
 const sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
     status: err.status,
@@ -48,6 +57,7 @@ module.exports = (err, req, res, next) => {
 
     if (errCp.name === 'CastError') errCp = handleCastError(errCp);
     if (errCp.code === 11000) errCp = handleDuplicateKey(errCp);
+    if (errCp.name === 'ValidationError') errCp = handleValidationError(errCp);
 
     sendErrorProd(errCp, res);
   }
