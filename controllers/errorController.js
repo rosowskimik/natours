@@ -1,5 +1,6 @@
 const AppError = require('../utils/appError');
 
+// MongoDB errors
 const handleCastError = err => {
   const message = `Invalid ${err.path}: ${err.value}`;
 
@@ -22,6 +23,14 @@ const handleValidationError = err => {
   return new AppError(message, 400);
 };
 
+// JWT errors
+const handleJWTError = () =>
+  new AppError('Invalid JWT token. Please log in again', 401);
+
+const handleTokenExpiredError = () =>
+  new AppError('Your token has expired. Please log in again', 401);
+
+// Responses
 const sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
     status: err.status,
@@ -54,10 +63,13 @@ module.exports = (err, req, res, next) => {
     sendErrorDev(err, res);
   } else if (process.env.NODE_ENV === 'production') {
     let errCp = { ...err };
+    errCp.message = err.message;
 
     if (errCp.name === 'CastError') errCp = handleCastError(errCp);
     if (errCp.code === 11000) errCp = handleDuplicateKey(errCp);
     if (errCp.name === 'ValidationError') errCp = handleValidationError(errCp);
+    if (errCp.name === 'JsonWebTokenError') errCp = handleJWTError();
+    if (errCp.name === 'TokenExpiredError') errCp = handleTokenExpiredError();
 
     sendErrorProd(errCp, res);
   }
