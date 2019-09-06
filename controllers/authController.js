@@ -12,6 +12,16 @@ const signToken = id => {
   });
 };
 
+const createSendToken = (id, statusCode, res, data) => {
+  const token = signToken(id);
+
+  res.status(statusCode).json({
+    status: 'success',
+    token,
+    ...data
+  });
+};
+
 exports.signUp = catchAsync(async (req, res) => {
   const newUser = await User.create({
     name: req.body.name,
@@ -20,16 +30,12 @@ exports.signUp = catchAsync(async (req, res) => {
     confirmPassword: req.body.confirmPassword
   });
 
-  const token = signToken(newUser._id);
-
-  res.status(201).json({
-    status: 'success',
-    token,
+  createSendToken(newUser._id, 201, res, {
     data: {
       user: {
-        _id: newUser._id,
-        name: newUser.name,
-        email: newUser.email
+        ...newUser._doc,
+        password: undefined,
+        __v: undefined
       }
     }
   });
@@ -47,13 +53,8 @@ exports.login = catchAsync(async (req, res, next) => {
   if (!user || !(await user.correctPassword(password, user.password))) {
     return next(new AppError('Incorrect user or password', 401));
   }
-
-  const token = signToken(user._id);
-
-  res.status(200).json({
-    status: 'success',
-    token
-  });
+  createSendToken(user._id, 200, res);
+  // });
 });
 
 exports.protect = catchAsync(async (req, res, next) => {
@@ -173,10 +174,29 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   await currentUser.save();
 
   // Login user
-  const token = signToken(currentUser._id);
+  createSendToken(currentUser._id, 200, res);
+});
 
-  res.status(200).json({
-    status: 'success',
-    token
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  const currentUser = await User.findById(req.user._id).select('+password');
+
+  // Check if correct password was provided
+  if (
+    !(await currentUser.correctPassword(
+      req.body.password,
+      currentUser.password
+    ))
+  ) {
+    return next(new AppError('Incorrect password', 401));
+  }
+
+  // Update password
+  currentUser.password = req.body.newPassword;
+  currentUser.confirmPassword = req.body.confirmNewPassword;
+  await currentUser.save();
+
+  // Login with new password
+  createSendToken(currentUser._id, 200, res, {
+    message: 'Your password has been changed'
   });
 });
