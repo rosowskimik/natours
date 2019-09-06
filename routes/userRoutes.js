@@ -18,6 +18,8 @@ router.patch(
 );
 
 // User routes
+router.patch('/updateMe', authController.protect, userController.updateMe);
+
 router
   .route('/')
   .get(userController.getAllUsers)

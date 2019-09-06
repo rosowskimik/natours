@@ -183,7 +183,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   // Check if correct password was provided
   if (
     !(await currentUser.correctPassword(
-      req.body.password,
+      req.body.currentPassword,
       currentUser.password
     ))
   ) {
@@ -191,8 +191,8 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   }
 
   // Update password
-  currentUser.password = req.body.newPassword;
-  currentUser.confirmPassword = req.body.confirmNewPassword;
+  currentUser.password = req.body.password;
+  currentUser.confirmPassword = req.body.confirmPassword;
   await currentUser.save();
 
   // Login with new password
