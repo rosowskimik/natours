@@ -6,6 +6,7 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const sendEmail = require('../utils/email');
 
+// Local utils
 const signToken = id => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN
@@ -22,6 +23,7 @@ const createSendToken = (id, statusCode, res, data) => {
   });
 };
 
+// Controllers
 exports.signUp = catchAsync(async (req, res) => {
   const newUser = await User.create({
     name: req.body.name,

@@ -19,10 +19,15 @@ router.patch(
 
 // User routes
 router.patch('/updateMe', authController.protect, userController.updateMe);
+router.delete('/deleteMe', authController.protect, userController.deleteMe);
 
 router
   .route('/')
-  .get(userController.getAllUsers)
+  .get(
+    authController.protect,
+    authController.restrictTo('admin', 'user'),
+    userController.getAllUsers
+  )
   .post(userController.createUser);
 
 router
