@@ -27,8 +27,7 @@ router
     authController.protect,
     authController.restrictTo('admin'),
     userController.getAllUsers
-  )
-  .post(userController.createUser);
+  );
 
 router
   .route('/:id')
