@@ -5,6 +5,7 @@ const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const sendEmail = require('../utils/email');
+const filterObj = require('../utils/filterObject');
 
 // Local utils
 const signToken = id => {
@@ -35,12 +36,8 @@ const createSendToken = (id, statusCode, res, data) => {
 
 // Controllers
 exports.signUp = catchAsync(async (req, res) => {
-  const newUser = await User.create({
-    name: req.body.name,
-    email: req.body.email,
-    password: req.body.password,
-    confirmPassword: req.body.confirmPassword
-  });
+  const filteredBody = filterObj(req.body);
+  const newUser = await User.create(filteredBody);
 
   createSendToken(newUser._id, 201, res, {
     data: {

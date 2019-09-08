@@ -9,7 +9,6 @@ exports.aliasTopTours = (req, res, next) => {
   req.query.fields = 'name,price,difficulty,summary,ratingsAverage';
   next();
 };
-
 // Requests
 
 exports.getAllTours = factory.getAll(Tour);

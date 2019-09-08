@@ -2,14 +2,7 @@ const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const factory = require('./handlerFactory');
-
-const filterObj = (obj, filters) => {
-  const newObj = {};
-  Object.keys(obj).forEach(el => {
-    if (filters.includes(el)) newObj[el] = obj[el];
-  });
-  return newObj;
-};
+const filterObj = require('../utils/filterObject');
 
 exports.getMe = (req, res, next) => {
   req.params.id = req.user.id;
@@ -25,8 +18,8 @@ exports.updateMe = catchAsync(async (req, res, next) => {
       )
     );
   }
-  const filteredBody = filterObj(req.body, ['name', 'email']);
 
+  const filteredBody = filterObj(req.body);
   const updatedUser = await User.findByIdAndUpdate(req.user._id, filteredBody, {
     new: true,
     runValidators: true
