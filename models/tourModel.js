@@ -70,10 +70,6 @@ const tourSchema = new mongoose.Schema(
     },
     startDates: [Date],
     slug: String,
-    secret: {
-      type: Boolean,
-      default: false
-    },
     startLocation: [
       {
         type: {
@@ -144,11 +140,6 @@ tourSchema.pre(/^find/, function(next) {
     path: 'guides',
     select: '-__v -passwordChangedAt'
   });
-  next();
-});
-
-tourSchema.pre('aggregate', function(next) {
-  this.pipeline().unshift({ $match: { secret: { $ne: true } } });
   next();
 });
 
