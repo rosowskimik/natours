@@ -74,16 +74,18 @@ const tourSchema = new mongoose.Schema(
       type: Boolean,
       default: false
     },
-    startLocation: {
-      type: {
-        type: String,
-        default: 'Point',
-        enum: ['Point']
-      },
-      coordinates: [Number],
-      address: String,
-      description: String
-    },
+    startLocation: [
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point']
+        },
+        coordinates: [Number],
+        address: String,
+        description: String
+      }
+    ],
     locations: [
       {
         type: {
@@ -124,6 +126,7 @@ tourSchema.virtual('reviews', {
 // Index properties
 tourSchema.index({ price: 1, ratingsAverage: -1 });
 tourSchema.index({ slug: 1 });
+tourSchema.index({ startLocation: '2dsphere' });
 
 // Middlewares
 tourSchema.pre('save', function(next) {

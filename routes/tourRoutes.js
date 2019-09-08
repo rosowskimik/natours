@@ -29,6 +29,10 @@ router
   );
 
 router
+  .route('/tours-within/:range/center/:latlng/units/:unit')
+  .get(tourController.getToursWithin);
+
+router
   .route('/:id')
   .get(tourController.getTour)
   .patch(
