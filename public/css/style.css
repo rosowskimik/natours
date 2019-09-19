@@ -1325,11 +1325,27 @@ body {
   border-radius: 5px;
 }
 
+.form {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.form__group {
+	width: 100%;
+}
+
+.form__group-center {
+	text-align: center;
+}
+
 .form__input {
   display: block;
   font-family: inherit;
   font-size: 1.5rem;
-  color: inherit;
+	color: inherit;
+	margin: 1rem 0;
   padding: 1.25rem 1.75rem;
   border: none;
   width: 100%;
@@ -1357,7 +1373,7 @@ body {
 }
 
 .form__group:not(:last-child) {
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .form__label {
@@ -1415,4 +1431,10 @@ body {
   box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.15);
   -webkit-transform: translateY(-2px);
   transform: translateY(-2px);
+}
+
+@media screen and (max-width: 600px) {
+	.login-form {
+		padding: 3rem 4rem;
+	}
 }
