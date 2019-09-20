@@ -9,10 +9,8 @@ const login = async (email, password) => {
   };
 
   try {
-    const res = await fetch('/api/v1/users/login', config);
-    const data = await res.json();
-    console.log(data);
-    console.log(window.location.replace('/'));
+    await fetch('/api/v1/users/login', config);
+    window.location.replace('/');
   } catch (err) {
     console.error(err);
   }

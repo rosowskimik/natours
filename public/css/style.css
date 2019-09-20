@@ -940,17 +940,12 @@ body {
 .nav--tours {
   -webkit-box-flex: 0;
   -ms-flex: 0 1 40%;
-  flex: 0 1 40%;
+	flex: 0 1 40%;
 }
-@media only screen and (max-width: 62.5em) {
-  .nav--tours {
-    margin-bottom: 1.5rem;
-  }
-}
-@media only screen and (max-width: 37.5em) {
-  .nav--tours {
-    margin-bottom: 0;
-  }
+@media screen and (max-width: 1000px) {
+	.nav--tours {
+		margin-right: 5px;
+	}
 }
 .nav--user {
   -webkit-box-flex: 0;
