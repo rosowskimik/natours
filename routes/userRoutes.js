@@ -6,6 +6,7 @@ const router = express.Router();
 
 // Unprotected routes
 router.post('/signup', authController.signUp);
+router.patch('/activateAccount/:token', authController.activateAccount);
 router.post('/login', authController.login);
 router.post('/forgotPassword', authController.forgotPassword);
 router.patch('/resetPassword/:token', authController.resetPassword);

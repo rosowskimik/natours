@@ -71,10 +71,6 @@ userSchema.pre('save', function(next) {
 });
 
 // Query middlewares
-userSchema.pre(/^find/, function(next) {
-  this.find({ active: { $ne: false } });
-  next();
-});
 
 // Instance methods
 userSchema.methods.createEmailConfirmToken = function() {

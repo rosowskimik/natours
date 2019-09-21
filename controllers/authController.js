@@ -8,7 +8,7 @@ const sendEmail = require('../utils/email');
 const filterObj = require('../utils/filterObject');
 
 // Local utils
-const sendNewEmail = async (emailData, res, next) => {
+const generateNewEmail = async (emailData, res, next) => {
   try {
     // Send email with user requested token
     await sendEmail({
@@ -32,12 +32,28 @@ const sendNewEmail = async (emailData, res, next) => {
   }
 };
 
+// Searches user based on provided header token
+const searchUserByToken = async (token, type) => {
+  const hashedToken = crypto
+    .createHash('sha256')
+    .update(token)
+    .digest('hex');
+
+  const searchedUser = await User.findOne({
+    [`${type}Token`]: hashedToken,
+    [`${type}TokenExpiration`]: { $gt: Date.now() }
+  });
+  return searchedUser;
+};
+
+// Generates new token
 const signToken = id => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN
   });
 };
 
+// Responds with login token
 const createSendToken = (id, statusCode, res, data) => {
   const token = signToken(id);
   const cookieOptions = {
@@ -80,10 +96,27 @@ exports.signUp = catchAsync(async (req, res, next) => {
     }
   };
 
-  await sendNewEmail(emailData, res, next);
+  await generateNewEmail(emailData, res, next);
 });
 
-exports.confirmEmail = catchAsync(async (req, res) => {});
+exports.activateAccount = catchAsync(async (req, res, next) => {
+  // Search for valid user with provided token
+  const newUser = await searchUserByToken(req.params.token, 'confirm');
+  if (!newUser) {
+    return next(new AppError('Your token is invalid or has expired', 400));
+  }
+
+  // Activate user
+  newUser.confirmToken = undefined;
+  newUser.confirmTokenExpiration = undefined;
+  newUser.active = true;
+  await newUser.save({ validateBeforeSave: false });
+
+  // Login user
+  createSendToken(newUser._id, 200, res, {
+    message: 'Your account has been activated'
+  });
+});
 
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
@@ -92,13 +125,16 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError('Email and password are required', 400));
   }
 
-  const user = await User.findOne({ email }).select('+password');
+  const user = await User.findOne({ email }).select('+password +active');
 
-  if (!user || !(await user.correctPassword(password, user.password))) {
+  if (
+    !user ||
+    !(await user.correctPassword(password, user.password)) ||
+    !user.active
+  ) {
     return next(new AppError('Incorrect user or password', 401));
   }
   createSendToken(user._id, 200, res);
-  // });
 });
 
 exports.protect = catchAsync(async (req, res, next) => {
@@ -186,8 +222,10 @@ exports.restrictTo = (...roles) => {
 };
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
-  const currentUser = await User.findOne({ email: req.body.email });
-  if (!currentUser) {
+  const currentUser = await User.findOne({ email: req.body.email }).select(
+    '+active'
+  );
+  if (!currentUser || !currentUser.active) {
     return next(new AppError('There is no user with this email', 404));
   }
 
@@ -211,20 +249,12 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   };
 
   // Send email
-  await sendNewEmail(emailData, res, next);
+  await generateNewEmail(emailData, res, next);
 });
 
 exports.resetPassword = catchAsync(async (req, res, next) => {
   // Check for valid token
-  const hashedToken = crypto
-    .createHash('sha256')
-    .update(req.params.token)
-    .digest('hex');
-
-  const currentUser = await User.findOne({
-    resetToken: hashedToken,
-    resetTokenExpiration: { $gt: Date.now() }
-  });
+  const currentUser = await searchUserByToken(req.params.token, 'reset');
 
   if (!currentUser) {
     return next(new AppError('Your token is invalid or has expired', 400));
