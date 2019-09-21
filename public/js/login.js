@@ -2,7 +2,7 @@
 import axios from 'axios';
 import showAlert from './alerts';
 
-const login = async (email, password) => {
+export const login = async (email, password) => {
   const config = {
     headers: {
       'Content-Type': 'application/json'
@@ -17,4 +17,11 @@ const login = async (email, password) => {
   }
 };
 
-export default login;
+export const logout = async () => {
+  try {
+    await axios.get('/api/v1/users/logout');
+    location.reload(true);
+  } catch (err) {
+    showAlert('error', 'There was a problem logging you out. Try again later');
+  }
+};
