@@ -137,3 +137,5 @@ $RECYCLE.BIN/
 req.http
 
 dev-data/
+public/js/bundle.js
+public/js/bundle.js.map
