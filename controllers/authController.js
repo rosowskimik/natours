@@ -8,6 +8,30 @@ const sendEmail = require('../utils/email');
 const filterObj = require('../utils/filterObject');
 
 // Local utils
+const sendNewEmail = async (emailData, res, next) => {
+  try {
+    // Send email with user requested token
+    await sendEmail({
+      email: emailData.email,
+      subject: `<Natours> ${emailData.subject}`,
+      message: emailData.message
+    });
+    // Send response
+    res.status(200).json({
+      status: 'success',
+      message: `${emailData.subject} link sent to provided email`
+    });
+  } catch (err) {
+    // Execute error cleanup function
+    await emailData.onError();
+    // Send response
+    return next(
+      new AppError('Something went wrong. Please try again later'),
+      500
+    );
+  }
+};
+
 const signToken = id => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN
@@ -35,20 +59,31 @@ const createSendToken = (id, statusCode, res, data) => {
 };
 
 // Controllers
-exports.signUp = catchAsync(async (req, res) => {
+exports.signUp = catchAsync(async (req, res, next) => {
   const filteredBody = filterObj(req.body);
   const newUser = await User.create(filteredBody);
 
-  createSendToken(newUser._id, 201, res, {
-    data: {
-      user: {
-        ...newUser._doc,
-        password: undefined,
-        __v: undefined
-      }
+  const confirmToken = newUser.createEmailConfirmToken();
+  await newUser.save({ validateBeforeSave: false });
+
+  const confirmLink = `${req.protocol}://${req.get(
+    'host'
+  )}/api/v1/confirmEmail/${confirmToken}`;
+
+  // Create new email data
+  const emailData = {
+    email: newUser.email,
+    subject: 'Account activation',
+    message: `Please activate your account using this link: ${confirmLink}`,
+    async onError() {
+      await User.delete({ email: newUser.email });
     }
-  });
+  };
+
+  await sendNewEmail(emailData, res, next);
 });
+
+exports.confirmEmail = catchAsync(async (req, res) => {});
 
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
@@ -163,29 +198,20 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     'host'
   )}/api/v1/resetToken/${resetToken}`;
 
-  const message = `Forgot your password? Use this link to reset your password:\n ${resetURL}\n If you didn't forget your password, please ignore this message.'`;
+  // Create new email data
+  const emailData = {
+    email: currentUser.email,
+    subject: 'Password Reset',
+    message: `Forgot your password? Use this link to reset your password:\n ${resetURL}\n If you didn't forget your password, please ignore this message.`,
+    async onError() {
+      currentUser.resetToken = undefined;
+      currentUser.resetTokenExpiration = undefined;
+      await currentUser.save({ validateBeforeSave: false });
+    }
+  };
 
-  try {
-    await sendEmail({
-      email: currentUser.email,
-      subject: '<Natours> Password Reset',
-      message
-    });
-
-    res.status(200).json({
-      status: 'success',
-      message: 'Password reset email sent to provided email'
-    });
-  } catch (err) {
-    currentUser.resetToken = undefined;
-    currentUser.resetTokenExpiration = undefined;
-    await currentUser.save({ validateBeforeSave: false });
-
-    return next(
-      new AppError('Something went wrong. Please try again later'),
-      500
-    );
-  }
+  // Send email
+  await sendNewEmail(emailData, res, next);
 });
 
 exports.resetPassword = catchAsync(async (req, res, next) => {

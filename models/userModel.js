@@ -1,7 +1,8 @@
-const crypto = require('crypto');
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
+
+const createSimpleToken = require('../utils/createSimpleToken');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -43,9 +44,11 @@ const userSchema = new mongoose.Schema({
   },
   resetToken: String,
   resetTokenExpiration: Date,
+  confirmToken: String,
+  confirmTokenExpiration: Date,
   active: {
     type: Boolean,
-    default: true,
+    default: false,
     select: false
   }
 });
@@ -74,6 +77,16 @@ userSchema.pre(/^find/, function(next) {
 });
 
 // Instance methods
+userSchema.methods.createEmailConfirmToken = function() {
+  const { newToken, hashedToken } = createSimpleToken();
+
+  this.confirmToken = hashedToken;
+
+  this.confirmTokenExpiration = Date.now() + 24 * 60 * 60 * 1000;
+
+  return newToken;
+};
+
 userSchema.methods.correctPassword = async function(
   candidatePassword,
   userPassword
@@ -94,16 +107,13 @@ userSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
 };
 
 userSchema.methods.createPasswordResetToken = function() {
-  const resetToken = crypto.randomBytes(32).toString('hex');
+  const { newToken, hashedToken } = createSimpleToken();
 
-  this.resetToken = crypto
-    .createHash('sha256')
-    .update(resetToken)
-    .digest('hex');
+  this.resetToken = hashedToken;
 
   this.resetTokenExpiration = Date.now() + 10 * 60 * 1000;
 
-  return resetToken;
+  return newToken;
 };
 
 const User = mongoose.model('User', userSchema);

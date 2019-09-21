@@ -3,6 +3,8 @@ const defaultFilters = [
   'passwordChangedAt',
   'resetToken',
   'resetTokenExpiration',
+  'confirmToken',
+  'confirmTokenExpiration',
   'active'
 ];
 

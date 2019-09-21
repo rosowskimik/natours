@@ -9,10 +9,11 @@ const login = async (email, password) => {
   };
 
   try {
-    await fetch('/api/v1/users/login', config);
-    window.location.replace('/');
+    const res = await fetch('/api/v1/users/login', config);
+    const { status } = await res.json();
+    if (status === 'success') location.replace('/');
   } catch (err) {
-    console.error(err);
+    console.error(err.response.data);
   }
 };
 
