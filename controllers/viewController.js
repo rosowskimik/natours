@@ -31,3 +31,9 @@ exports.getLogin = (req, res) => {
     title: 'Login'
   });
 };
+
+exports.getSignup = (req, res) => {
+  res.status(200).render('signup', {
+    title: 'Create new account'
+  });
+};
