@@ -12,13 +12,12 @@ exports.getOverview = catchAsync(async (req, res) => {
 });
 
 exports.getTour = catchAsync(async (req, res, next) => {
-  const { slug } = req.params;
-  if (!slug) return next(new AppError('This page does not exist', 404));
-
-  const tour = await Tour.findOne({ slug }).populate({
+  const tour = await Tour.findOne({ slug: req.params.slug }).populate({
     path: 'reviews',
     fields: 'review rating user'
   });
+
+  if (!tour) return next(new AppError('This page does not exist', 404));
 
   res.status(200).render('tour', {
     title: tour.name,
