@@ -1320,7 +1320,8 @@ body {
   border-radius: 5px;
 }
 
-.form {
+.form-login,
+.form-signup {
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
