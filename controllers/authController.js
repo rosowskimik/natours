@@ -84,7 +84,7 @@ exports.signUp = catchAsync(async (req, res, next) => {
 
   const confirmLink = `${req.protocol}://${req.get(
     'host'
-  )}/api/v1/confirmEmail/${confirmToken}`;
+  )}/signup/${confirmToken}`;
 
   // Create new email data
   const emailData = {

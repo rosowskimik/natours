@@ -2,7 +2,7 @@
 import axios from 'axios';
 import showAlert from './alerts';
 
-const signup = async (username, email, password, confirmPassword) => {
+export const signup = async (username, email, password, confirmPassword) => {
   if (password === confirmPassword) {
     const config = {
       headers: {
@@ -29,4 +29,13 @@ const signup = async (username, email, password, confirmPassword) => {
   }
 };
 
-export default signup;
+export const activateAccount = async token => {
+  try {
+    await axios.get(`/api/v1/users/signup/${token}`);
+    showAlert('success', 'Your account has been activated');
+    setTimeout(() => location.assign('/'), 5000);
+  } catch (err) {
+    showAlert('error', err.response.data.message);
+    setTimeout(() => location.replace('/'), 5000);
+  }
+};

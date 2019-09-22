@@ -37,3 +37,10 @@ exports.getSignup = (req, res) => {
     title: 'Create new account'
   });
 };
+
+exports.getActivateAccount = (req, res) => {
+  res.status(200).render('activate', {
+    title: 'Create new account',
+    token: req.params.token
+  });
+};
