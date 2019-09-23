@@ -94,3 +94,9 @@ exports.deleteOne = Model =>
       data: null
     });
   });
+
+exports.serveTemplate = (template, title) => (req, res) => {
+  res.status(200).render(template, {
+    title
+  });
+};

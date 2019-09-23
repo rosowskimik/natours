@@ -249,7 +249,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 
   const resetURL = `${req.protocol}://${req.get(
     'host'
-  )}/api/v1/resetToken/${resetToken}`;
+  )}/resetPassword/${resetToken}`;
 
   // Create new email data
   const emailData = {

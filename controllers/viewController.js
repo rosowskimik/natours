@@ -1,4 +1,5 @@
 const Tour = require('../models/tourModel');
+const { serveTemplate } = require('./handlerFactory');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 
@@ -25,27 +26,15 @@ exports.getTour = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.getLogin = (req, res) => {
-  res.status(200).render('login', {
-    title: 'Login'
-  });
-};
+exports.getLogin = serveTemplate('login', 'Login');
+exports.getSignup = serveTemplate('signup', 'Create new account');
+exports.getAccount = serveTemplate('account', 'My account');
+exports.getForgotPassword = serveTemplate('forgotPassword', 'Forgot password');
+exports.getResetPassword = serveTemplate('resetPassword', 'Password reset');
 
-exports.getSignup = (req, res) => {
-  res.status(200).render('signup', {
-    title: 'Create new account'
-  });
-};
-
-exports.activate = (req, res) => {
+exports.getActivate = (req, res) => {
   res.status(200).render('activate', {
     title: 'Activate account',
     token: req.params.token
-  });
-};
-
-exports.getAccount = (req, res) => {
-  res.status(200).render('account', {
-    title: 'My account'
   });
 };
