@@ -43,3 +43,9 @@ exports.getActivateAccount = (req, res) => {
     token: req.params.token
   });
 };
+
+exports.getAccount = (req, res) => {
+  res.status(200).render('account', {
+    title: 'My account'
+  });
+};

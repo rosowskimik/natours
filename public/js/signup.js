@@ -20,7 +20,7 @@ export const signup = async (username, email, password, confirmPassword) => {
         'success',
         'Confirmation email sent to provided email address. Please check your email'
       );
-      setTimeout(() => location.assign('/'), 5000);
+      setTimeout(() => location.assign('/'), 3000);
     } catch (err) {
       showAlert('error', err.response.data.message);
     }
@@ -33,9 +33,9 @@ export const activateAccount = async token => {
   try {
     await axios.get(`/api/v1/users/signup/${token}`);
     showAlert('success', 'Your account has been activated');
-    setTimeout(() => location.assign('/'), 5000);
+    setTimeout(() => location.assign('/'), 3000);
   } catch (err) {
     showAlert('error', err.response.data.message);
-    setTimeout(() => location.replace('/'), 5000);
+    setTimeout(() => location.replace('/'), 3000);
   }
 };

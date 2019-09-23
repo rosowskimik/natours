@@ -20,7 +20,7 @@ export const login = async (email, password) => {
 export const logout = async () => {
   try {
     await axios.get('/api/v1/users/logout');
-    location.reload(true);
+    location.assign('/');
   } catch (err) {
     showAlert('error', 'There was a problem logging you out. Try again later');
   }

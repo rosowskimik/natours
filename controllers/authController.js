@@ -186,6 +186,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   // Pass to next middleware
   req.user = currentUser;
+  res.locals.user = currentUser;
   next();
 });
 
