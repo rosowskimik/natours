@@ -50,7 +50,11 @@ body {
   flex: 1;
   position: relative;
 }
-
+@media screen and (max-width: 600px) {
+	.main {
+		padding: 0;
+	}
+}
 .flex {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -819,7 +823,7 @@ body {
 
 .user-view {
   background-color: #fff;
-  max-width: 120rem;
+  min-width: 80vw;
   margin: 0 auto;
   min-height: 100vh;
   border-radius: 3px;
@@ -831,9 +835,6 @@ body {
   display: flex;
 }
 .user-view__menu {
-  -webkit-box-flex: 32rem;
-  -ms-flex: 32rem 0 0px;
-  flex: 32rem 0 0;
   background-image: -webkit-gradient(
     linear,
     left top,
@@ -855,7 +856,14 @@ body {
   margin: 0 auto;
   padding: 0 8rem;
 }
-
+@media screen and (max-width: 600px) {
+	.hide-on-small {
+		display: none;
+	}
+	.user-view__form-container {
+		padding: 0 1rem;
+	}
+}
 .footer {
   background-color: #f7f7f7;
   padding: 6rem 4rem 3rem 4rem;
@@ -1320,8 +1328,7 @@ body {
   border-radius: 5px;
 }
 
-.form-login,
-.form-signup {
+.form {
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
@@ -1433,4 +1440,14 @@ body {
 	.login-form {
 		padding: 3rem 4rem;
 	}
+	.side-nav svg {
+		margin-right: 0;
+	}
+}
+
+.forgot-password {
+	position: relative;
+	font-size: 1.6rem;
+	text-decoration: none;
+	bottom: -10px;
 }
