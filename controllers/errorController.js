@@ -30,6 +30,10 @@ const handleJWTError = () =>
 const handleTokenExpiredError = () =>
   new AppError('Your token has expired. Please log in again', 401);
 
+// Multer errors
+const handleMulterFileSizeError = () =>
+  new AppError('File size exceeded limit of 2Mb', 413);
+
 // Responses
 const sendErrorDev = (req, res, err) => {
   if (req.originalUrl.startsWith('/api')) {
@@ -89,6 +93,7 @@ module.exports = (err, req, res, next) => {
     if (errCp.name === 'ValidationError') errCp = handleValidationError(errCp);
     if (errCp.name === 'JsonWebTokenError') errCp = handleJWTError();
     if (errCp.name === 'TokenExpiredError') errCp = handleTokenExpiredError();
+    if (errCp.code === 'LIMIT_FILE_SIZE') errCp = handleMulterFileSizeError();
 
     sendErrorProd(req, res, errCp);
   }
