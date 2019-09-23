@@ -13,6 +13,6 @@ router.get('/', viewController.getOverview);
 router.get('/tour/:slug', viewController.getTour);
 router.get('/login', viewController.getLogin);
 router.get('/signup', viewController.getSignup);
-router.get('/signup', viewController.getSignup);
+router.get('/signup/:token', viewController.activate);
 
 module.exports = router;

@@ -9,7 +9,6 @@ const mapbox = document.getElementById('map');
 const signupForm = document.querySelector('.form-signup');
 const loginForm = document.querySelector('.form-login');
 const logoutBtn = document.querySelector('.nav__el--logout');
-const activateEl = document.getElementById('activate-account');
 
 // Map display
 if (mapbox) displayMap(mapbox);
@@ -26,9 +25,8 @@ if (signupForm) {
     event.preventDefault();
   });
 }
-if (activateEl) {
-  const token = JSON.parse(activateEl.dataset.token);
-  console.log(token);
+if (document.getElementById('activate')) {
+  const token = location.pathname.split('/')[2];
   activateAccount(token);
 }
 // Login

@@ -37,9 +37,9 @@ exports.getSignup = (req, res) => {
   });
 };
 
-exports.getActivateAccount = (req, res) => {
+exports.activate = (req, res) => {
   res.status(200).render('activate', {
-    title: 'Create new account',
+    title: 'Activate account',
     token: req.params.token
   });
 };
