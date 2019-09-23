@@ -3,12 +3,15 @@ import '@babel/polyfill';
 import displayMap from './mapbox';
 import { signup, activateAccount } from './signup';
 import { login, logout } from './login';
-import { sendResetRequest, submitNewPassword } from './passwords';
+import { updateData, updatePassword } from './updateUserData';
+import { sendResetRequest, submitNewPassword } from './passwordReset';
 
 // DOM elements
 const mapbox = document.getElementById('map');
 const signupForm = document.querySelector('.form-signup');
 const loginForm = document.querySelector('.form-login');
+const dataForm = document.querySelector('.form-user-data');
+const passwordForm = document.querySelector('.form-user-settings');
 const forgotForm = document.querySelector('.form-forgot');
 const resetForm = document.querySelector('.form-reset');
 const logoutBtn = document.querySelector('.nav__el--logout');
@@ -43,9 +46,29 @@ if (loginForm) {
     event.preventDefault();
   });
 }
-// Logout
-if (logoutBtn) logoutBtn.addEventListener('click', event => logout());
+// Updating user data
+if (dataForm) {
+  dataForm.addEventListener('submit', event => {
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
 
+    updateData(name, email);
+
+    event.preventDefault();
+  });
+}
+// Updating user password
+if (passwordForm) {
+  passwordForm.addEventListener('submit', event => {
+    const currentPassword = document.getElementById('password-current').value;
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('password-confirm').value;
+
+    updatePassword(currentPassword, password, confirmPassword);
+
+    event.preventDefault();
+  });
+}
 // Password reset token reqest
 if (forgotForm) {
   forgotForm.addEventListener('submit', event => {
@@ -56,7 +79,6 @@ if (forgotForm) {
     event.preventDefault();
   });
 }
-
 // Submit new password
 if (resetForm) {
   resetForm.addEventListener('submit', event => {
@@ -72,3 +94,5 @@ if (resetForm) {
     event.preventDefault();
   });
 }
+// Logout
+if (logoutBtn) logoutBtn.addEventListener('click', event => logout());
