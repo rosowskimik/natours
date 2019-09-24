@@ -1,9 +1,48 @@
+const sharp = require('sharp');
 const Tour = require('../models/tourModel');
+const multerConfig = require('../utils/multerConfig');
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
 const AppError = require('../utils/appError');
 
 // Middlewares
+const upload = multerConfig(25 * 1024 * 1024);
+exports.uploadTourImages = upload.fields([
+  { name: 'imageCover', maxCount: 1 },
+  { name: 'images', maxCount: 3 }
+]);
+
+exports.resizeTourImages = catchAsync(async (req, res, next) => {
+  if (req.files.imageCover) {
+    req.body.imageCover = `tour-${req.params.id}-cover.jpeg`;
+
+    await sharp(req.files.imageCover[0].buffer)
+      .resize(2000, 1333)
+      .toFormat('jpeg')
+      .jpeg({ quality: 90 })
+      .toFile(`public/img/tours/${req.body.imageCover}`);
+  }
+
+  if (req.files.images) {
+    req.body.images = [];
+
+    await Promise.all(
+      req.files.images.map(async (file, index) => {
+        const fileName = `tour-${req.params.id}-${index + 1}.jpeg`;
+
+        await sharp(file.buffer)
+          .resize(2000, 1333)
+          .toFormat('jpeg')
+          .jpeg({ quality: 65 })
+          .toFile(`public/img/tours/${fileName}`);
+
+        req.body.images.push(fileName);
+      })
+    );
+  }
+  next();
+});
+
 exports.aliasTopTours = (req, res, next) => {
   req.query.limit = '5';
   req.query.sort = '-ratingsAverage,price';
@@ -11,7 +50,6 @@ exports.aliasTopTours = (req, res, next) => {
   next();
 };
 // Requests
-
 exports.getAllTours = factory.getAll(Tour);
 exports.getTour = factory.getOne(Tour, { path: 'reviews' });
 exports.createTour = factory.createOne(Tour);
