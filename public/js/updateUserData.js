@@ -2,9 +2,9 @@
 import axios from 'axios';
 import showAlert from './alerts';
 
-export const updateData = async (name, email) => {
+export const updateData = async data => {
   try {
-    axios.patch('/api/v1/users/updateMe', { name, email });
+    axios.patch('/api/v1/users/updateMe', data);
     showAlert('success', 'User updated');
   } catch (err) {
     showAlert('error', err.response.data.message);
