@@ -32,7 +32,7 @@ const handleTokenExpiredError = () =>
 
 // Multer errors
 const handleMulterFileSizeError = () =>
-  new AppError('File size exceeded limit of 2Mb', 413);
+  new AppError('File size exceeded limit of 10Mb', 413);
 
 // Responses
 const sendErrorDev = (req, res, err) => {

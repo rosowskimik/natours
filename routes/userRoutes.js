@@ -19,6 +19,7 @@ router.get('/me', userController.getMe, userController.getUser);
 router.patch(
   '/updateMe',
   userController.updateUserPhoto,
+  userController.resizeUserPhoto,
   userController.updateMe
 );
 router.patch('/updatePassword', authController.updatePassword);
