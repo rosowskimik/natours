@@ -5,7 +5,6 @@ const htmlToText = require('html-to-text');
 
 class Email {
   constructor(user, url) {
-    console.log('Constructor called');
     this.to = user.email;
     this.firstName = user.name.split(' ')[0];
     this.url = url;
@@ -14,8 +13,13 @@ class Email {
 
   newTransporter() {
     if (process.env.NODE_ENV === 'production') {
-      // Sendgrid
-      return 1;
+      return nodemailer.createTransport({
+        service: 'SendGrid',
+        auth: {
+          user: process.env.SENDGRID_USER,
+          pass: process.env.SENDGRID_PASSWORD
+        }
+      });
     }
 
     return nodemailer.createTransport({
@@ -29,7 +33,6 @@ class Email {
   }
 
   async send(template, subject) {
-    console.log('Send called');
     const html = pug.renderFile(
       path.resolve(__dirname, '../views/email', `${template}.pug`),
       {
@@ -38,7 +41,6 @@ class Email {
         subject
       }
     );
-    console.log(html);
     const mailOptions = {
       from: this.from,
       to: this.to,
@@ -46,7 +48,6 @@ class Email {
       html,
       text: htmlToText.fromString(html)
     };
-
     return this.newTransporter().sendMail(mailOptions);
   }
 
@@ -58,7 +59,6 @@ class Email {
   }
 
   async sendActivate() {
-    console.log('SendActivate called');
     await this.send('accountActivation', '<Natours> Account activation');
   }
 

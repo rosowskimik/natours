@@ -63,9 +63,7 @@ exports.signUp = catchAsync(async (req, res, next) => {
 
   // Send new email
   try {
-    console.log('Before sending');
     await new Email(newUser, confirmURL).sendActivate();
-    console.log('After sending');
   } catch (err) {
     await newUser.remove();
     return next(
@@ -80,16 +78,6 @@ exports.signUp = catchAsync(async (req, res, next) => {
     status: 'success',
     message: `Activation link sent to provided email`
   });
-  // const emailData = {
-  //   email: newUser.email,
-  //   subject: 'Account activation',
-  //   message: `Please activate your account using this link: ${confirmLink}`,
-  //   async onError() {
-  //     await User.delete({ email: newUser.email });
-  //   }
-  // };
-
-  // await generateNewEmail(emailData, res, next);
 });
 
 exports.activateAccount = catchAsync(async (req, res, next) => {
@@ -247,18 +235,6 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   const resetURL = `${req.protocol}://${req.get(
     'host'
   )}/resetPassword/${resetToken}`;
-
-  // Create new email
-  // const emailData = {
-  //   email: currentUser.email,
-  //   subject: 'Password Reset',
-  //   message: `Forgot your password? Use this link to reset your password:\n ${resetURL}\n If you didn't forget your password, please ignore this message.`,
-  //   async onError() {
-  //     currentUser.resetToken = undefined;
-  //     currentUser.resetTokenExpiration = undefined;
-  //     await currentUser.save({ validateBeforeSave: false });
-  //   }
-  // };
 
   // Send email
   await new Email(currentUser, resetURL).sendPasswordReset();
