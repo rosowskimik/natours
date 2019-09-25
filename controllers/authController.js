@@ -3,34 +3,9 @@ const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
-const AppError = require('../utils/appError');
-const sendEmail = require('../utils/email');
 const filterObj = require('../utils/filterObject');
-
-// Local utils
-const generateNewEmail = async (emailData, res, next) => {
-  try {
-    // Send email with user requested token
-    await sendEmail({
-      email: emailData.email,
-      subject: `<Natours> ${emailData.subject}`,
-      message: emailData.message
-    });
-    // Send response
-    res.status(200).json({
-      status: 'success',
-      message: `${emailData.subject} link sent to provided email`
-    });
-  } catch (err) {
-    // Execute error cleanup function
-    await emailData.onError();
-    // Send response
-    return next(
-      new AppError('Something went wrong. Please try again later'),
-      500
-    );
-  }
-};
+const AppError = require('../utils/appError');
+const Email = require('../utils/email');
 
 // Searches user based on provided header token
 const searchUserByToken = async (token, type) => {
@@ -82,21 +57,39 @@ exports.signUp = catchAsync(async (req, res, next) => {
   const confirmToken = newUser.createEmailConfirmToken();
   await newUser.save({ validateBeforeSave: false });
 
-  const confirmLink = `${req.protocol}://${req.get(
+  const confirmURL = `${req.protocol}://${req.get(
     'host'
   )}/signup/${confirmToken}`;
 
-  // Create new email data
-  const emailData = {
-    email: newUser.email,
-    subject: 'Account activation',
-    message: `Please activate your account using this link: ${confirmLink}`,
-    async onError() {
-      await User.delete({ email: newUser.email });
-    }
-  };
+  // Send new email
+  try {
+    console.log('Before sending');
+    await new Email(newUser, confirmURL).sendActivate();
+    console.log('After sending');
+  } catch (err) {
+    await newUser.remove();
+    return next(
+      new AppError(
+        'There was an error with creating your account. Please try again later',
+        500
+      )
+    );
+  }
 
-  await generateNewEmail(emailData, res, next);
+  res.status(200).json({
+    status: 'success',
+    message: `Activation link sent to provided email`
+  });
+  // const emailData = {
+  //   email: newUser.email,
+  //   subject: 'Account activation',
+  //   message: `Please activate your account using this link: ${confirmLink}`,
+  //   async onError() {
+  //     await User.delete({ email: newUser.email });
+  //   }
+  // };
+
+  // await generateNewEmail(emailData, res, next);
 });
 
 exports.activateAccount = catchAsync(async (req, res, next) => {
@@ -111,6 +104,10 @@ exports.activateAccount = catchAsync(async (req, res, next) => {
   newUser.confirmTokenExpiration = undefined;
   newUser.active = true;
   await newUser.save({ validateBeforeSave: false });
+
+  // Send welcome email
+  const url = `${req.protocol}://${req.get('host')}/me`;
+  await new Email(newUser, url).sendWelcome();
 
   // Login user
   createSendToken(newUser._id, 200, res, {
@@ -251,20 +248,25 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     'host'
   )}/resetPassword/${resetToken}`;
 
-  // Create new email data
-  const emailData = {
-    email: currentUser.email,
-    subject: 'Password Reset',
-    message: `Forgot your password? Use this link to reset your password:\n ${resetURL}\n If you didn't forget your password, please ignore this message.`,
-    async onError() {
-      currentUser.resetToken = undefined;
-      currentUser.resetTokenExpiration = undefined;
-      await currentUser.save({ validateBeforeSave: false });
-    }
-  };
+  // Create new email
+  // const emailData = {
+  //   email: currentUser.email,
+  //   subject: 'Password Reset',
+  //   message: `Forgot your password? Use this link to reset your password:\n ${resetURL}\n If you didn't forget your password, please ignore this message.`,
+  //   async onError() {
+  //     currentUser.resetToken = undefined;
+  //     currentUser.resetTokenExpiration = undefined;
+  //     await currentUser.save({ validateBeforeSave: false });
+  //   }
+  // };
 
   // Send email
-  await generateNewEmail(emailData, res, next);
+  await new Email(currentUser, resetURL).sendPasswordReset();
+
+  res.status(200).json({
+    status: 'success',
+    message: "Password reset email sent to user's email"
+  });
 });
 
 exports.resetPassword = catchAsync(async (req, res, next) => {

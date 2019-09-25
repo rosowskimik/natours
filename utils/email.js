@@ -5,6 +5,7 @@ const htmlToText = require('html-to-text');
 
 class Email {
   constructor(user, url) {
+    console.log('Constructor called');
     this.to = user.email;
     this.firstName = user.name.split(' ')[0];
     this.url = url;
@@ -27,16 +28,17 @@ class Email {
     });
   }
 
-  send(template, subject) {
+  async send(template, subject) {
+    console.log('Send called');
     const html = pug.renderFile(
-      path.resolve(__dirname, '../views/emails', `${template}.pug`),
+      path.resolve(__dirname, '../views/email', `${template}.pug`),
       {
         firstName: this.firstName,
         url: this.url,
         subject
       }
     );
-
+    console.log(html);
     const mailOptions = {
       from: this.from,
       to: this.to,
@@ -56,7 +58,12 @@ class Email {
   }
 
   async sendActivate() {
-    await this.send('activate', '<Natours> Account activation');
+    console.log('SendActivate called');
+    await this.send('accountActivation', '<Natours> Account activation');
+  }
+
+  async sendPasswordReset() {
+    await this.send('passwordReset', '<Natours> Password reset');
   }
 }
 
