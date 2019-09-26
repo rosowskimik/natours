@@ -5,6 +5,7 @@ import { signup, activateAccount } from './signup';
 import { login, logout } from './login';
 import { updateData, updatePassword } from './updateUserData';
 import { sendResetRequest, submitNewPassword } from './passwordReset';
+import bookTour from './stripe';
 
 // DOM elements
 const mapbox = document.getElementById('map');
@@ -15,6 +16,7 @@ const passwordForm = document.querySelector('.form-user-settings');
 const forgotForm = document.querySelector('.form-forgot');
 const resetForm = document.querySelector('.form-reset');
 const logoutBtn = document.querySelector('.nav__el--logout');
+const bookBtn = document.getElementById('book-tour');
 
 // Map display
 if (mapbox) displayMap(mapbox);
@@ -106,3 +108,13 @@ if (resetForm) {
 }
 // Logout
 if (logoutBtn) logoutBtn.addEventListener('click', event => logout());
+
+// Handle payments
+if (bookBtn) {
+  bookBtn.addEventListener('click', event => {
+    event.target.textContent = 'Processing';
+    const { tourId } = event.target.dataset;
+
+    bookTour(tourId);
+  });
+}
