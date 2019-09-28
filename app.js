@@ -1,5 +1,6 @@
 const path = require('path');
 const express = require('express');
+const compression = require('compression');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const morgan = require('morgan');
@@ -7,6 +8,7 @@ const cookieParser = require('cookie-parser');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
+const cors = require('cors');
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
@@ -18,10 +20,21 @@ const globalErrorHandler = require('./controllers/errorController');
 
 const app = express();
 
+// Enable proxy
+app.enable('trust proxy');
+
+// Enable cors
+app.use(cors());
+app.options('*', cors());
+
+// Set views engine
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
 // 1) MIDDLEWARES
+// Response compression
+app.use(compression());
+
 // Setting security headers
 app.use(helmet());
 

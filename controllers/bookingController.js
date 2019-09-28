@@ -17,7 +17,9 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
       {
         name: `${tour.name} tour`,
         description: tour.description,
-        images: [`https://www.natours.dev/img/tours/${tour.imageCover}`],
+        images: [
+          `https://natours-gng.herokuapp.com/img/tours/${tour.imageCover}`
+        ],
         amount: tour.price * 100,
         currency: 'usd',
         quantity: 1
